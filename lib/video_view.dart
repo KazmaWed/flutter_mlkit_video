@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class VideoView extends StatefulWidget {
-  const VideoView({super.key});
+  const VideoView({super.key, this.videoXFile});
+  final XFile? videoXFile;
 
   @override
   State<VideoView> createState() => _VideoViewState();
@@ -12,7 +14,7 @@ class _VideoViewState extends State<VideoView> {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      child: const Text('Video View'),
+      child: Text((widget.videoXFile == null).toString()),
     );
   }
 }
