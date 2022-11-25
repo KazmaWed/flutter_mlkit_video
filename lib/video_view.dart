@@ -14,7 +14,7 @@ class _VideoViewState extends State<VideoView> {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      child: Text((widget.videoXFile == null).toString()),
+      child: Text(widget.videoXFile == null ? '未選択' : widget.videoXFile!.path),
     );
   }
 }
