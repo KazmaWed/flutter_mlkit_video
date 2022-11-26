@@ -53,7 +53,6 @@ class _VideoViewState extends State<VideoView> {
     super.initState();
     // ポーズ推定開始
     _future = _saveVideoFrames(widget.videoXFile?.path);
-    return null;
   }
 
   @override
