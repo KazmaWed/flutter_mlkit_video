@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter/ffmpeg_session.dart';
 import 'package:ffmpeg_kit_flutter/ffprobe_kit.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:flutter/foundation.dart';
@@ -12,7 +11,7 @@ import 'package:path_provider/path_provider.dart';
 // アプリからファイルを保存するディレクトリのパス
 Future<String> localFilePath() async {
   Directory tmpDocDir = await getTemporaryDirectory();
-  // print(tmpDocDir.path);
+  print(tmpDocDir.path);
   return tmpDocDir.path;
 }
 
@@ -34,30 +33,32 @@ Future<bool> createVideo({
   const exportPrefix = 'ffmpeg_';
 
   // メタデータ取得
-  final videoInfo = await getVideoMetadata(videoFilePath);
-  final videoWidth = videoInfo!['coded_width'];
-  final videoHeight = videoInfo['coded_height'];
+  final Map<String, dynamic>? videoInfo = await getVideoMetadata(videoFilePath);
+  final int videoWidth = videoInfo!['coded_width'];
+  final int videoHeight = videoInfo['coded_height'];
   late final double videoFps;
   if (videoInfo['r_frame_rate'] != null) {
-    final fraction = videoInfo['r_frame_rate']!.toString().split('/');
+    final List<String> fraction = videoInfo['r_frame_rate']!.toString().split('/');
     videoFps = double.parse(fraction[0]) / double.parse(fraction[1]);
   }
 
+  print([videoWidth, videoHeight, videoFps]);
+
   // フレーム抽出
   final ffmpegCoomand = '-i $videoFilePath -q:v 1 -vcodec png $localPath/$exportPrefix%05d.png';
-  await FFmpegKit.execute(ffmpegCoomand).then((FFmpegSession session) async {
+  await FFmpegKit.execute(ffmpegCoomand).then((session) async {
     final returnCode = await session.getReturnCode();
 
     if (ReturnCode.isSuccess(returnCode)) {
-      // Finish
-      await paintLandMarks(
+      // 前フレームにランドマークペイント追加
+      await _paintAllLandmarks(
         context: context,
         localPath: localPath,
         videoWidth: videoWidth,
         videoHeight: videoHeight,
       ).then((succeed) async {
         if (succeed) {
-          await createVideoFromFrames(localPath: localPath, videoFps: videoFps);
+          await _createVideoFromFrames(localPath: localPath, videoFps: videoFps);
         }
       });
     } else if (ReturnCode.isCancel(returnCode)) {
@@ -72,8 +73,45 @@ Future<bool> createVideo({
   return true;
 }
 
+Future<bool> _paintAllLandmarks({
+  required BuildContext context,
+  required String localPath,
+  required int videoWidth,
+  required int videoHeight,
+}) async {
+  const exportPrefix = 'ffmpeg_';
+
+  var complete = false;
+  var succeed = true;
+  var index = 1;
+
+  while (!complete) {
+    print(index);
+    try {
+      final frameFileName = '$exportPrefix${index.toString().padLeft(5, '0')}.png';
+      final frameFilePath = '$localPath/$frameFileName';
+
+      final fileExist = await _paintLandmarks(
+        context: context,
+        frameFilePath: frameFilePath,
+        videoWidth: videoWidth,
+        videoHeight: videoHeight,
+      );
+
+      complete = !fileExist;
+    } catch (e) {
+      print(e);
+      succeed = false;
+      complete = true;
+    }
+    index += 1;
+  }
+
+  return succeed;
+}
+
 // ウィジットを画像化してパスに保存
-Future<bool> paintLandmarks(
+Future<bool> _paintLandmarks(
     {required BuildContext context,
     required String frameFilePath,
     required int videoWidth,
@@ -115,44 +153,7 @@ Future<bool> paintLandmarks(
   }
 }
 
-Future<bool> paintLandMarks({
-  required BuildContext context,
-  required String localPath,
-  required int videoWidth,
-  required int videoHeight,
-}) async {
-  const exportPrefix = 'ffmpeg_';
-
-  var complete = false;
-  var succeed = true;
-  var index = 1;
-
-  while (!complete) {
-    print(index);
-    try {
-      final frameFileName = '$exportPrefix${index.toString().padLeft(5, '0')}.png';
-      final frameFilePath = '$localPath/$frameFileName';
-
-      final fileExist = await paintLandmarks(
-        context: context,
-        frameFilePath: frameFilePath,
-        videoWidth: videoWidth,
-        videoHeight: videoHeight,
-      );
-
-      complete = !fileExist;
-    } catch (e) {
-      print(e);
-      succeed = false;
-      complete = true;
-    }
-    index += 1;
-  }
-
-  return succeed;
-}
-
-Future<void> createVideoFromFrames({
+Future<void> _createVideoFromFrames({
   required String localPath,
   required double videoFps,
 }) async {

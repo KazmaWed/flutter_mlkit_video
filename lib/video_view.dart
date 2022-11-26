@@ -26,6 +26,9 @@ class _VideoViewState extends State<VideoView> {
 
   // ビデオの前フレームにランドマークを乗せて保存
   Future<void> _saveVideoFrames(String? videoFilePath) async {
+    localPath = await localFilePath();
+    print(videoFilePath);
+
     if (!_busy) {
       // ファイル未選択時
       if (videoFilePath == null) return;
@@ -46,12 +49,11 @@ class _VideoViewState extends State<VideoView> {
   }
 
   @override
-  void initState() async {
+  void initState() {
     super.initState();
-    // フレーム画像の保存先パス
-    localPath = await localFilePath();
     // ポーズ推定開始
     _future = _saveVideoFrames(widget.videoXFile?.path);
+    return null;
   }
 
   @override
