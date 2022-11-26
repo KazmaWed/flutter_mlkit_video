@@ -20,19 +20,14 @@ class _VideoViewState extends State<VideoView> {
 
   var _busy = false; // 画像化処理の連続実行ガード用
 
-  void _reset() {
-    _busy = false;
-  }
-
   // ビデオの前フレームにランドマークを乗せて保存
-  Future<void> _saveVideoFrames(String? videoFilePath) async {
+  Future<void> _convertVideo(String? videoFilePath) async {
     localPath = await localFilePath();
     print(videoFilePath);
 
     if (!_busy) {
       // ファイル未選択時
       if (videoFilePath == null) return;
-
       setState(() => _busy = true);
 
       // フレーム抽出
@@ -41,9 +36,7 @@ class _VideoViewState extends State<VideoView> {
         localPath: localPath,
         videoFilePath: videoFilePath,
       ).then((succeed) {
-        if (succeed) {
-          setState(() => _reset());
-        } else {}
+        setState(() => _busy = false);
       });
     }
   }
@@ -52,7 +45,7 @@ class _VideoViewState extends State<VideoView> {
   void initState() {
     super.initState();
     // ポーズ推定開始
-    _future = _saveVideoFrames(widget.videoXFile?.path);
+    _future = _convertVideo(widget.videoXFile?.path);
   }
 
   @override
@@ -76,7 +69,8 @@ class _VideoViewState extends State<VideoView> {
                   child: Text(snapshot.error.toString()),
                 );
               } else {
-                setState(() => _future = Future.value(null));
+                _future = Future.value(null);
+
                 return Container(
                   alignment: Alignment.center,
                   child: const Text('終了'),

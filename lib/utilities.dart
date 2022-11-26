@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter/ffprobe_kit.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_video_info/flutter_video_info.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 // アプリからファイルを保存するディレクトリのパス
 Future<String> localFilePath() async {
@@ -17,12 +19,44 @@ Future<String> localFilePath() async {
 
 // ビデオのメタデータ取得
 Future<Map<String, dynamic>?> getVideoMetadata(String videoFilePath) async {
-  Map<String, dynamic>? videoInfo;
-  await FFprobeKit.getMediaInformation(videoFilePath).then((value) {
-    final mediaInfoRaw = value.getMediaInformation()!.getAllProperties()!['streams'].first;
-    videoInfo = Map<String, dynamic>.from(mediaInfoRaw);
-  });
-  return videoInfo;
+  final videoInfo = await FlutterVideoInfo().getVideoInfo(videoFilePath) as VideoData;
+  return {
+    'width': videoInfo.width,
+    'height': videoInfo.height,
+    'fps': videoInfo.framerate,
+  };
+}
+
+Future<int> getFileNum() async {
+  int count = 0;
+  final localDirectory = await getApplicationDocumentsDirectory();
+
+  List<FileSystemEntity> files = localDirectory.listSync(recursive: true, followLinks: false);
+  for (var file in files) {
+    final fileName = file.path.split('/').last;
+    if (fileName.startsWith('ffmpeg_')) {
+      count++;
+    }
+  }
+  return count;
+}
+
+Future<void> _removeFiles() async {
+  final localDirectory = await getTemporaryDirectory();
+  for (var entry in localDirectory.listSync(recursive: true, followLinks: false)) {
+    final fileName = entry.path.split('/').last;
+    if (fileName.startsWith('ffmpeg_')) {
+      entry.deleteSync();
+    }
+  }
+}
+
+Future<void> _saveToCameraRoll() async {
+  Permission.storage.request();
+
+  final localDirectory = await getTemporaryDirectory();
+  final videoFilePath = '${localDirectory.path}/ffmpeg_video.mp4';
+  await ImageGallerySaver.saveFile(videoFilePath);
 }
 
 Future<bool> createVideo({
@@ -34,15 +68,9 @@ Future<bool> createVideo({
 
   // メタデータ取得
   final Map<String, dynamic>? videoInfo = await getVideoMetadata(videoFilePath);
-  final int videoWidth = videoInfo!['coded_width'];
-  final int videoHeight = videoInfo['coded_height'];
-  late final double videoFps;
-  if (videoInfo['r_frame_rate'] != null) {
-    final List<String> fraction = videoInfo['r_frame_rate']!.toString().split('/');
-    videoFps = double.parse(fraction[0]) / double.parse(fraction[1]);
-  }
-
-  print([videoWidth, videoHeight, videoFps]);
+  final int videoWidth = videoInfo!['width'];
+  final int videoHeight = videoInfo['height'];
+  final double videoFps = videoInfo['fps'];
 
   // フレーム抽出
   final ffmpegCoomand = '-i $videoFilePath -q:v 1 -vcodec png $localPath/$exportPrefix%05d.png';
@@ -59,6 +87,8 @@ Future<bool> createVideo({
       ).then((succeed) async {
         if (succeed) {
           await _createVideoFromFrames(localPath: localPath, videoFps: videoFps);
+          await _saveToCameraRoll();
+          await _removeFiles();
         }
       });
     } else if (ReturnCode.isCancel(returnCode)) {
@@ -160,7 +190,7 @@ Future<void> _createVideoFromFrames({
   const exportPrefix = 'ffmpeg_';
 
   final ffmpegCommand =
-      '-framerate $videoFps -i $localPath/$exportPrefix%05d.png -b 800k -r $videoFps $localPath/video.mp4';
+      '-framerate $videoFps -i $localPath/$exportPrefix%05d.png -b 800k -r $videoFps $localPath/ffmpeg_video.mp4';
 
   await FFmpegKit.execute(ffmpegCommand).then((session) async {
     final returnCode = await session.getReturnCode();
