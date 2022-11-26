@@ -11,6 +11,7 @@ class MlkitScreen extends StatefulWidget {
 
 class _MlkitScreenState extends State<MlkitScreen> {
   XFile? _videoPicked;
+  late Widget videoView;
 
   Future<void> _pickVideo() async {
     // ギャラリーからビデオを選択
@@ -24,12 +25,21 @@ class _MlkitScreenState extends State<MlkitScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_videoPicked == null) {
+      videoView = Container(
+        alignment: Alignment.center,
+        child: const Text('ファイルを選択して下さい'),
+      );
+    } else {
+      videoView = VideoView(videoXFile: _videoPicked);
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Google ML Kit'),
       ),
       body: SafeArea(
-        child: VideoView(videoXFile: _videoPicked),
+        child: videoView,
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.video_file_rounded),
