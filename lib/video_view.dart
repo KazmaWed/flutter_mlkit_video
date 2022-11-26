@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mlkit_video/pose_detect_video.dart';
 import 'package:flutter_mlkit_video/utilities.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -23,7 +24,6 @@ class _VideoViewState extends State<VideoView> {
   // ビデオの前フレームにランドマークを乗せて保存
   Future<void> _convertVideo(String? videoFilePath) async {
     localPath = await localFilePath();
-    print(videoFilePath);
 
     if (!_busy) {
       // ファイル未選択時
@@ -31,7 +31,7 @@ class _VideoViewState extends State<VideoView> {
       setState(() => _busy = true);
 
       // フレーム抽出
-      await createVideo(
+      await PoseDetectVideo.createVideo(
         context: context,
         localPath: localPath,
         videoFilePath: videoFilePath,
