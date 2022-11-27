@@ -5,8 +5,8 @@ import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mlkit_video/landmark_painter.dart';
-import 'package:flutter_mlkit_video/utilities.dart';
+import 'package:flutter_mlkit_video/model/landmark_painter.dart';
+import 'package:flutter_mlkit_video/utility/utilities.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 
 class MlkitVideoConverter {
@@ -30,7 +30,7 @@ class MlkitVideoConverter {
   Future<List<File>?> convertVideoToFrames({required BuildContext context}) async {
     const exportPrefix = 'ffmpeg_';
 
-    await removeFiles();
+    await removeFFmpegFiles();
 
     // フレーム抽出
     final ffmpegCoomand = '-i $videoFilePath -q:v 1 -vcodec png $localPath/$exportPrefix%05d.png';

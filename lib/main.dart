@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mlkit_video/filepick_screen.dart';
+import 'package:flutter_mlkit_video/view/filepick_screen.dart';
 
 void main() {
   runApp(const MyApp());

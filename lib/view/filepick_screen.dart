@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mlkit_video/video_view.dart';
+import 'package:flutter_mlkit_video/view/video_convert_view.dart';
 import 'package:image_picker/image_picker.dart';
 
 class MlkitScreen extends StatefulWidget {

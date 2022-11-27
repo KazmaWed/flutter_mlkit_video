@@ -22,7 +22,7 @@ Future<Map<String, dynamic>?> getVideoMetadata(String videoFilePath) async {
   };
 }
 
-Future<void> removeFiles() async {
+Future<void> removeFFmpegFiles() async {
   final localDirectory = await getTemporaryDirectory();
   for (var entry in localDirectory.listSync(recursive: true, followLinks: false)) {
     final fileName = entry.path.split('/').last;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mlkit_video/mlkit_video_converter.dart';
-import 'package:flutter_mlkit_video/utilities.dart';
+import 'package:flutter_mlkit_video/model/mlkit_video_converter.dart';
+import 'package:flutter_mlkit_video/utility/utilities.dart';
 import 'package:image_picker/image_picker.dart';
 
 class VideoView extends StatefulWidget {
@@ -15,9 +15,9 @@ class _VideoViewState extends State<VideoView> {
   late Future _future;
 
   var _busy = false; // 画像化処理の連続実行ガード用
-  var completion = 0.0;
+  var _completion = 0.0; // 完了率
 
-  // ビデオの前フレームにランドマークを乗せて保存
+  // ビデオの全フレームにランドマークをペイントして保存
   Future<void> _convertVideo() async {
     if (!_busy) {
       // 開始
@@ -31,24 +31,29 @@ class _VideoViewState extends State<VideoView> {
       // ファイル未選択時ガード
       if (videoFilePath == null) return;
 
-      // フレーム抽出
+      // コンバーター初期化
       final mlkitVideoConverter = MlkitVideoConverter(localPath: localPath);
       await mlkitVideoConverter.initialize(videoFilePath: videoFilePath);
+      // フレーム抽出
       final frameImageFiles = await mlkitVideoConverter.convertVideoToFrames(context: context);
+      // 全フレームにランドマークをペイント
       if (frameImageFiles != null) {
         for (var index = 0; index < frameImageFiles.length; index++) {
           final file = frameImageFiles[index];
           await mlkitVideoConverter.paintLandmarks(context: context, frameFilePath: file.path);
-          setState(() => completion = index / frameImageFiles.length);
+          setState(() => _completion = index / frameImageFiles.length); // プログレス更新
         }
       }
+      // フレームから動画生成
       final exportFilePath = await mlkitVideoConverter.createVideoFromFrames();
-
+      // カメラロールに保存
       if (exportFilePath != null) {
         await saveToCameraRoll(exportFilePath);
       }
-      await removeFiles();
+      // キャッシュクリア
+      await removeFFmpegFiles();
 
+      // 完了ダイアログ表示
       showDialog(
         context: context,
         builder: (_) {
@@ -77,37 +82,42 @@ class _VideoViewState extends State<VideoView> {
   @override
   Widget build(BuildContext context) {
     return widget.videoXFile == null
+        // ---------- ファイル選択前 ----------
         ? Container(
             alignment: Alignment.center,
             child: const Text('ファイルを選択してください'),
           )
+        // ---------- ファイル選択後 ----------
         : FutureBuilder(
             future: _future,
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
+                // ---------- 処理中 ----------
                 return Container(
                   alignment: Alignment.center,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('ポーズ推定中'),
+                      const Text('書き出し中'),
                       const SizedBox(height: 16),
                       CircularProgressIndicator(
-                        value: completion,
+                        value: _completion,
                         backgroundColor: Colors.black12,
                       ),
                     ],
                   ),
                 );
               } else if (snapshot.hasError) {
+                // ---------- エラー発生時 ----------
                 return Container(
                   alignment: Alignment.center,
                   child: Text(snapshot.error.toString()),
                 );
               } else {
+                // ---------- 完了 ----------
                 return Container(
                   alignment: Alignment.center,
-                  child: const Text('終了'),
+                  child: const Text('カメラロールに保存しました'),
                 );
               }
             },
