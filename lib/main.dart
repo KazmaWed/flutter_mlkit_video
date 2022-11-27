@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mlkit_video/view/filepick_screen.dart';
+import 'package:flutter_mlkit_video/view/main_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.pink,
       ),
-      home: const MlkitScreen(),
+      home: const MainScreen(),
     );
   }
 }

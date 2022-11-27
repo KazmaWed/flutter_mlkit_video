@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mlkit_video/view/video_convert_view.dart';
 import 'package:image_picker/image_picker.dart';
 
-class MlkitScreen extends StatefulWidget {
-  const MlkitScreen({super.key});
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
 
   @override
-  State<MlkitScreen> createState() => _MlkitScreenState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MlkitScreenState extends State<MlkitScreen> {
+class _MainScreenState extends State<MainScreen> {
   XFile? _videoPicked;
   late Widget videoView;
 
