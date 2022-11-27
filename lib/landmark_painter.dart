@@ -5,15 +5,9 @@ import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 class LankmarkPainter extends CustomPainter {
   LankmarkPainter({
     required this.pose,
-    required this.imageWidth,
-    required this.imageHeight,
-    required this.screenWidth,
     required this.image,
   });
   final Pose pose;
-  final int imageWidth;
-  final int imageHeight;
-  final double screenWidth;
   final ui.Image image;
 
   List<PoseLandmarkType> get faceParts => [

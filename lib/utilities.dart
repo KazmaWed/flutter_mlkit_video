@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 // アプリからファイルを保存するディレクトリのパス
 Future<String> localFilePath() async {
   Directory tmpDocDir = await getTemporaryDirectory();
+  // ignore: avoid_print
   print(tmpDocDir.path);
   return tmpDocDir.path;
 }
@@ -21,20 +22,6 @@ Future<Map<String, dynamic>?> getVideoMetadata(String videoFilePath) async {
   };
 }
 
-Future<int> getFileNum() async {
-  int count = 0;
-  final localDirectory = await getApplicationDocumentsDirectory();
-
-  List<FileSystemEntity> files = localDirectory.listSync(recursive: true, followLinks: false);
-  for (var file in files) {
-    final fileName = file.path.split('/').last;
-    if (fileName.startsWith('ffmpeg_')) {
-      count++;
-    }
-  }
-  return count;
-}
-
 Future<void> removeFiles() async {
   final localDirectory = await getTemporaryDirectory();
   for (var entry in localDirectory.listSync(recursive: true, followLinks: false)) {
@@ -45,10 +32,7 @@ Future<void> removeFiles() async {
   }
 }
 
-Future<void> saveToCameraRoll() async {
+Future<void> saveToCameraRoll(String filePath) async {
   Permission.storage.request();
-
-  final localDirectory = await getTemporaryDirectory();
-  final videoFilePath = '${localDirectory.path}/ffmpeg_video.mp4';
-  await ImageGallerySaver.saveFile(videoFilePath);
+  await ImageGallerySaver.saveFile(filePath);
 }

@@ -28,23 +28,21 @@ class _MlkitScreenState extends State<MlkitScreen> {
     if (_videoPicked == null) {
       videoView = Container(
         alignment: Alignment.center,
-        child: const Text('ファイルを選択して下さい'),
+        child: ElevatedButton(
+          child: const Text('ファイル選択'),
+          onPressed: () async => _pickVideo(),
+        ),
       );
     } else {
       videoView = VideoView(videoXFile: _videoPicked);
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Google ML Kit'),
-      ),
-      body: SafeArea(
-        child: videoView,
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.video_file_rounded),
-        onPressed: () async => _pickVideo(),
-      ),
-    );
+        appBar: AppBar(
+          title: const Text('Google ML Kit'),
+        ),
+        body: SafeArea(
+          child: videoView,
+        ));
   }
 }
