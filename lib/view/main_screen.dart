@@ -11,10 +11,11 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   XFile? _videoPicked;
-  late Widget videoView;
+  late Widget scaffoldBody;
 
+  // ビデオを選択ボタン
   Future<void> _pickVideo() async {
-    // ギャラリーからビデオを選択
+    // カメラロールからビデオを選択
     await ImagePicker().pickVideo(source: ImageSource.gallery).then((result) {
       if (result != null) {
         _videoPicked = result;
@@ -26,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     if (_videoPicked == null) {
-      videoView = Container(
+      scaffoldBody = Container(
         alignment: Alignment.center,
         child: ElevatedButton(
           child: const Text('ファイル選択'),
@@ -34,15 +35,16 @@ class _MainScreenState extends State<MainScreen> {
         ),
       );
     } else {
-      videoView = VideoView(videoXFile: _videoPicked);
+      scaffoldBody = VideoConvertView(videoXFile: _videoPicked);
     }
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Google ML Kit'),
-        ),
-        body: SafeArea(
-          child: videoView,
-        ));
+      appBar: AppBar(
+        title: const Text('Flutter ML Kit'),
+      ),
+      body: SafeArea(
+        child: scaffoldBody,
+      ),
+    );
   }
 }

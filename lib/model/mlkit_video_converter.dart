@@ -10,21 +10,20 @@ import 'package:flutter_mlkit_video/utility/utilities.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 
 class MlkitVideoConverter {
-  MlkitVideoConverter({required this.localPath});
-
+  late final String localPath;
+  late final String videoFilePath;
   late final int videoWidth;
   late final int videoHeight;
   late final double videoFps;
-  late final String videoFilePath;
-  final String localPath;
 
   // メタデータ取得
-  Future<void> initialize({required String videoFilePath}) async {
+  Future<void> initialize({required String localPath, required String videoFilePath}) async {
     final Map<String, dynamic>? videoInfo = await getVideoMetadata(videoFilePath);
+    this.localPath = localPath;
+    this.videoFilePath = videoFilePath;
     videoWidth = videoInfo!['width'];
     videoHeight = videoInfo['height'];
     videoFps = videoInfo['fps'];
-    this.videoFilePath = videoFilePath;
   }
 
   Future<List<File>?> convertVideoToFrames({required BuildContext context}) async {

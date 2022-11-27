@@ -3,19 +3,19 @@ import 'package:flutter_mlkit_video/model/mlkit_video_converter.dart';
 import 'package:flutter_mlkit_video/utility/utilities.dart';
 import 'package:image_picker/image_picker.dart';
 
-class VideoView extends StatefulWidget {
-  const VideoView({super.key, this.videoXFile});
+class VideoConvertView extends StatefulWidget {
+  const VideoConvertView({super.key, this.videoXFile});
   final XFile? videoXFile;
 
   @override
-  State<VideoView> createState() => _VideoViewState();
+  State<VideoConvertView> createState() => _VideoConvertViewState();
 }
 
-class _VideoViewState extends State<VideoView> {
+class _VideoConvertViewState extends State<VideoConvertView> {
   late Future<void> _future;
 
   var _busy = false; // 画像化処理の連続実行ガード用
-  var _completion = 0.0; // 完了率
+  var _progress = 0.0; // 完了率
 
   // ビデオの全フレームにランドマークを描画して保存
   Future<void> _convertVideo() async {
@@ -29,11 +29,14 @@ class _VideoViewState extends State<VideoView> {
       if (videoFilePath == null) return;
 
       // 作成したファイルの保存先パス
-      final localPath = await localFilePath();
+      final localPath = await getLocalPath();
 
-      // コンバーター初期化
-      final mlkitVideoConverter = MlkitVideoConverter(localPath: localPath);
-      await mlkitVideoConverter.initialize(videoFilePath: videoFilePath);
+      // コンバーターの作成と初期化
+      final mlkitVideoConverter = MlkitVideoConverter();
+      await mlkitVideoConverter.initialize(
+        localPath: localPath,
+        videoFilePath: videoFilePath,
+      );
       // フレーム抽出
       final frameImageFiles = await mlkitVideoConverter.convertVideoToFrames(context: context);
       // 全フレームにランドマークを描画
@@ -41,7 +44,7 @@ class _VideoViewState extends State<VideoView> {
         for (var index = 0; index < frameImageFiles.length; index++) {
           final file = frameImageFiles[index];
           await mlkitVideoConverter.paintLandmarks(context: context, frameFilePath: file.path);
-          setState(() => _completion = index / frameImageFiles.length); // プログレス更新
+          setState(() => _progress = index / frameImageFiles.length); // プログレス更新
         }
       }
       // フレームから動画生成
@@ -109,7 +112,7 @@ class _VideoViewState extends State<VideoView> {
                 // ---------- 処理中 ----------
                 return Container(
                   alignment: Alignment.center,
-                  child: _progressView(_completion),
+                  child: _progressView(_progress),
                 );
               } else if (snapshot.hasError) {
                 // ---------- エラー発生時 ----------

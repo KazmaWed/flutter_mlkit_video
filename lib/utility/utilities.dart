@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 // アプリからファイルを保存するディレクトリのパス
-Future<String> localFilePath() async {
+Future<String> getLocalPath() async {
   Directory tmpDocDir = await getTemporaryDirectory();
   // ignore: avoid_print
   print(tmpDocDir.path);
