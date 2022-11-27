@@ -28,12 +28,11 @@ class MlkitVideoConverter {
   }
 
   Future<List<File>?> convertVideoToFrames({required BuildContext context}) async {
-    const exportPrefix = 'ffmpeg_';
-
     await removeFFmpegFiles();
 
     // フレーム抽出
-    final ffmpegCoomand = '-i $videoFilePath -q:v 1 -vcodec png $localPath/$exportPrefix%05d.png';
+    final ffmpegCoomand =
+        '-i $videoFilePath -q:v 1 -vcodec png $localPath/${CommonValue.filePrefix}%05d.png';
     await FFmpegKit.execute(ffmpegCoomand).then((session) async {
       final returnCode = await session.getReturnCode();
 
@@ -56,7 +55,7 @@ class MlkitVideoConverter {
         localDirectory.listSync(recursive: true, followLinks: false);
     for (var entity in fileEntities) {
       final fileName = entity.path.split('/').last;
-      if (fileName.startsWith('ffmpeg_')) {
+      if (fileName.startsWith(CommonValue.filePrefix)) {
         files.add(File(entity.path));
       }
     }
@@ -64,15 +63,13 @@ class MlkitVideoConverter {
   }
 
   Future<bool> paintAllLandmarks({required BuildContext context}) async {
-    const exportPrefix = 'ffmpeg_';
-
     var complete = false;
     var succeed = true;
     var index = 1;
 
     while (!complete) {
       try {
-        final frameFileName = '$exportPrefix${index.toString().padLeft(5, '0')}.png';
+        final frameFileName = '${CommonValue.filePrefix}${index.toString().padLeft(5, '0')}.png';
         final frameFilePath = '$localPath/$frameFileName';
 
         final fileExist = await paintLandmarks(
@@ -130,10 +127,9 @@ class MlkitVideoConverter {
   }
 
   Future<String?> createVideoFromFrames() async {
-    const exportPrefix = 'ffmpeg_';
     final exportVideoFilePath = '$localPath/ffmpeg_video.mp4';
     final ffmpegCommand =
-        '-framerate $videoFps -i $localPath/$exportPrefix%05d.png -r $videoFps $exportVideoFilePath';
+        '-framerate $videoFps -i $localPath/${CommonValue.filePrefix}%05d.png -r $videoFps $exportVideoFilePath';
 
     var succeed = false;
 

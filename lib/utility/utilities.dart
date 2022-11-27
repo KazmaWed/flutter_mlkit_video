@@ -26,7 +26,7 @@ Future<void> removeFFmpegFiles() async {
   final localDirectory = await getTemporaryDirectory();
   for (var entry in localDirectory.listSync(recursive: true, followLinks: false)) {
     final fileName = entry.path.split('/').last;
-    if (fileName.startsWith('ffmpeg_')) {
+    if (fileName.startsWith(CommonValue.filePrefix)) {
       entry.deleteSync();
     }
   }
@@ -35,4 +35,8 @@ Future<void> removeFFmpegFiles() async {
 Future<void> saveToCameraRoll(String filePath) async {
   Permission.storage.request();
   await ImageGallerySaver.saveFile(filePath);
+}
+
+class CommonValue {
+  static String filePrefix = 'ffmpeg_';
 }
