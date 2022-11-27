@@ -12,7 +12,7 @@ class VideoView extends StatefulWidget {
 }
 
 class _VideoViewState extends State<VideoView> {
-  late Future _future;
+  late Future<void> _future;
 
   var _busy = false; // 画像化処理の連続実行ガード用
   var _completion = 0.0; // 完了率
@@ -25,11 +25,11 @@ class _VideoViewState extends State<VideoView> {
 
       // 選択したファイルパス
       final videoFilePath = widget.videoXFile?.path;
-      // 作成したファイルの保存先パス
-      final localPath = await localFilePath();
-
       // ファイル未選択時ガード
       if (videoFilePath == null) return;
+
+      // 作成したファイルの保存先パス
+      final localPath = await localFilePath();
 
       // コンバーター初期化
       final mlkitVideoConverter = MlkitVideoConverter(localPath: localPath);
@@ -58,7 +58,6 @@ class _VideoViewState extends State<VideoView> {
         context: context,
         builder: (_) {
           return AlertDialog(
-            // title: const Text('カメラロールに保存しました'),
             content: const Text('カメラロールに保存しました'),
             actions: [
               TextButton(child: const Text('OK'), onPressed: () => Navigator.pop(context)),
@@ -70,6 +69,21 @@ class _VideoViewState extends State<VideoView> {
       //  終了
       setState(() => _busy = false);
     }
+  }
+
+  // 処理中プログレスバー
+  Widget _progressView(double value) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('書き出し中'),
+        const SizedBox(height: 16),
+        CircularProgressIndicator(
+          value: value,
+          backgroundColor: Colors.black12,
+        ),
+      ],
+    );
   }
 
   @override
@@ -95,17 +109,7 @@ class _VideoViewState extends State<VideoView> {
                 // ---------- 処理中 ----------
                 return Container(
                   alignment: Alignment.center,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('書き出し中'),
-                      const SizedBox(height: 16),
-                      CircularProgressIndicator(
-                        value: _completion,
-                        backgroundColor: Colors.black12,
-                      ),
-                    ],
-                  ),
+                  child: _progressView(_completion),
                 );
               } else if (snapshot.hasError) {
                 // ---------- エラー発生時 ----------
