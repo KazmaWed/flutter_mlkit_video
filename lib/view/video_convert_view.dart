@@ -17,7 +17,7 @@ class _VideoViewState extends State<VideoView> {
   var _busy = false; // 画像化処理の連続実行ガード用
   var _completion = 0.0; // 完了率
 
-  // ビデオの全フレームにランドマークをペイントして保存
+  // ビデオの全フレームにランドマークを描画して保存
   Future<void> _convertVideo() async {
     if (!_busy) {
       // 開始
@@ -36,7 +36,7 @@ class _VideoViewState extends State<VideoView> {
       await mlkitVideoConverter.initialize(videoFilePath: videoFilePath);
       // フレーム抽出
       final frameImageFiles = await mlkitVideoConverter.convertVideoToFrames(context: context);
-      // 全フレームにランドマークをペイント
+      // 全フレームにランドマークを描画
       if (frameImageFiles != null) {
         for (var index = 0; index < frameImageFiles.length; index++) {
           final file = frameImageFiles[index];

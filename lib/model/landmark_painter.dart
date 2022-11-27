@@ -10,7 +10,8 @@ class LankmarkPainter extends CustomPainter {
   final Pose pose;
   final ui.Image image;
 
-  List<PoseLandmarkType> get faceParts => [
+  // ランドマークを分類
+  List<PoseLandmarkType> get faceLandmarks => [
         PoseLandmarkType.leftEyeInner,
         PoseLandmarkType.leftEye,
         PoseLandmarkType.leftEyeOuter,
@@ -22,7 +23,7 @@ class LankmarkPainter extends CustomPainter {
         PoseLandmarkType.leftMouth,
         PoseLandmarkType.rightMouth,
       ];
-  List<PoseLandmarkType> get rightArm => [
+  List<PoseLandmarkType> get rightArmLandmarks => [
         PoseLandmarkType.rightShoulder,
         PoseLandmarkType.rightElbow,
         PoseLandmarkType.rightWrist,
@@ -30,7 +31,7 @@ class LankmarkPainter extends CustomPainter {
         PoseLandmarkType.rightIndex,
         PoseLandmarkType.rightPinky,
       ];
-  List<PoseLandmarkType> get leftArm => [
+  List<PoseLandmarkType> get leftArmLandmarks => [
         PoseLandmarkType.leftShoulder,
         PoseLandmarkType.leftElbow,
         PoseLandmarkType.leftWrist,
@@ -38,7 +39,7 @@ class LankmarkPainter extends CustomPainter {
         PoseLandmarkType.leftIndex,
         PoseLandmarkType.leftPinky,
       ];
-  List<PoseLandmarkType> get leftLeg => [
+  List<PoseLandmarkType> get leftLegLandmarks => [
         PoseLandmarkType.leftHip,
         PoseLandmarkType.leftKnee,
         PoseLandmarkType.leftAnkle,
@@ -60,14 +61,18 @@ class LankmarkPainter extends CustomPainter {
     // 画像の描画
     canvas.drawImage(image, Offset.zero, Paint());
 
-    // ランドマークのペイント
+    // ランドマークの描画
+
     // 胴体
     final paint = Paint()
       ..color = Colors.grey
       ..strokeWidth = strokeWidth;
-    final p1 = Offset(pose.landmarks[rightArm.first]!.x, pose.landmarks[rightArm.first]!.y);
-    final p2 = Offset(pose.landmarks[leftArm.first]!.x, pose.landmarks[leftArm.first]!.y);
-    final p3 = Offset(pose.landmarks[leftLeg.first]!.x, pose.landmarks[leftLeg.first]!.y);
+    final p1 = Offset(
+        pose.landmarks[rightArmLandmarks.first]!.x, pose.landmarks[rightArmLandmarks.first]!.y);
+    final p2 = Offset(
+        pose.landmarks[leftArmLandmarks.first]!.x, pose.landmarks[leftArmLandmarks.first]!.y);
+    final p3 = Offset(
+        pose.landmarks[leftLegLandmarks.first]!.x, pose.landmarks[leftLegLandmarks.first]!.y);
     final p4 = Offset(pose.landmarks[rightLeg.first]!.x, pose.landmarks[rightLeg.first]!.y);
     canvas.drawLine(p1, p2, paint);
     canvas.drawLine(p2, p3, paint);
@@ -75,46 +80,46 @@ class LankmarkPainter extends CustomPainter {
     canvas.drawLine(p4, p1, paint);
 
     // 左腕
-    for (var index = 0; index < leftArm.length - 1; index++) {
-      final landmark1 = leftArm[index];
-      final landmark2 = leftArm[index + 1];
+    for (var index = 0; index < leftArmLandmarks.length - 1; index++) {
+      final landmark1 = leftArmLandmarks[index];
+      final landmark2 = leftArmLandmarks[index + 1];
       final paint = Paint()
         ..color = landmark1.color
         ..strokeWidth = strokeWidth;
       final p1 = Offset(pose.landmarks[landmark1]!.x, pose.landmarks[landmark1]!.y);
       final p2 = Offset(pose.landmarks[landmark2]!.x, pose.landmarks[landmark2]!.y);
       canvas.drawCircle(p1, strokeWidth, paint);
-      if (index < leftArm.length - 1) {
+      if (index < leftArmLandmarks.length - 1) {
         canvas.drawLine(p1, p2, paint);
       }
     }
 
     // 右腕
-    for (var index = 0; index < rightArm.length - 1; index++) {
-      final landmark1 = rightArm[index];
-      final landmark2 = rightArm[index + 1];
+    for (var index = 0; index < rightArmLandmarks.length - 1; index++) {
+      final landmark1 = rightArmLandmarks[index];
+      final landmark2 = rightArmLandmarks[index + 1];
       final paint = Paint()
         ..color = landmark1.color
         ..strokeWidth = strokeWidth;
       final p1 = Offset(pose.landmarks[landmark1]!.x, pose.landmarks[landmark1]!.y);
       final p2 = Offset(pose.landmarks[landmark2]!.x, pose.landmarks[landmark2]!.y);
       canvas.drawCircle(p1, strokeWidth, paint);
-      if (index < rightArm.length - 1) {
+      if (index < rightArmLandmarks.length - 1) {
         canvas.drawLine(p1, p2, paint);
       }
     }
 
     // 左脚
-    for (var index = 0; index < leftLeg.length - 1; index++) {
-      final landmark1 = leftLeg[index];
-      final landmark2 = leftLeg[index + 1];
+    for (var index = 0; index < leftLegLandmarks.length - 1; index++) {
+      final landmark1 = leftLegLandmarks[index];
+      final landmark2 = leftLegLandmarks[index + 1];
       final paint = Paint()
         ..color = landmark1.color
         ..strokeWidth = strokeWidth;
       final p1 = Offset(pose.landmarks[landmark1]!.x, pose.landmarks[landmark1]!.y);
       final p2 = Offset(pose.landmarks[landmark2]!.x, pose.landmarks[landmark2]!.y);
       canvas.drawCircle(p1, strokeWidth, paint);
-      if (index < leftLeg.length - 1) {
+      if (index < leftLegLandmarks.length - 1) {
         canvas.drawLine(p1, p2, paint);
       }
     }
@@ -135,7 +140,7 @@ class LankmarkPainter extends CustomPainter {
     }
 
     // 顔
-    for (var landmark in faceParts) {
+    for (var landmark in faceLandmarks) {
       final paint = Paint()..color = landmark.color;
       final position = Offset(pose.landmarks[landmark]!.x, pose.landmarks[landmark]!.y);
       canvas.drawCircle(position, strokeWidth, paint);
