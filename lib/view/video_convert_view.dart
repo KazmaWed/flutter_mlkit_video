@@ -41,12 +41,12 @@ class _VideoConvertViewState extends State<VideoConvertView> {
         videoFilePath: videoFilePath,
       );
       // ビデオからフレーム抽出
-      final frameImageFiles = await mlkitVideoConverter.convertVideoToFrames(context: context);
+      final frameImageFiles = await mlkitVideoConverter.convertVideoToFrames();
       // 全フレームにランドマークを描画
       if (frameImageFiles != null) {
         for (var index = 0; index < frameImageFiles.length; index++) {
           final file = frameImageFiles[index];
-          await mlkitVideoConverter.paintLandmarks(context: context, frameFilePath: file.path);
+          await mlkitVideoConverter.paintLandmarks(frameFileDirPath: file.path);
           setState(() => _progress = index / frameImageFiles.length); // プログレス更新
         }
       }

@@ -16,8 +16,11 @@ class MlkitVideoConverter {
   late final int videoHeight;
   late final double videoFps;
 
-  // メタデータ取得
-  Future<void> initialize({required String localPath, required String videoFilePath}) async {
+  // メタデータ取得などの初期化処理
+  Future<void> initialize({
+    required String localPath,
+    required String videoFilePath,
+  }) async {
     final Map<String, dynamic>? videoInfo = await getVideoMetadata(videoFilePath);
     this.localPath = localPath;
     this.videoFilePath = videoFilePath;
@@ -26,7 +29,8 @@ class MlkitVideoConverter {
     videoFps = videoInfo['fps'];
   }
 
-  Future<List<File>?> convertVideoToFrames({required BuildContext context}) async {
+  // ビデオをフレームに分割してPNG画像として保存
+  Future<List<File>?> convertVideoToFrames() async {
     await removeFFmpegFiles();
 
     // フレーム抽出
@@ -61,39 +65,10 @@ class MlkitVideoConverter {
     return files;
   }
 
-  Future<bool> paintAllLandmarks({required BuildContext context}) async {
-    var complete = false;
-    var succeed = true;
-    var index = 1;
-
-    while (!complete) {
-      try {
-        final frameFileName = '${CommonValue.filePrefix}${index.toString().padLeft(5, '0')}.png';
-        final frameFilePath = '$localPath/$frameFileName';
-
-        final fileExist = await paintLandmarks(
-          context: context,
-          frameFilePath: frameFilePath,
-        );
-
-        complete = !fileExist;
-      } catch (e) {
-        succeed = false;
-        complete = true;
-      }
-      index += 1;
-    }
-
-    return succeed;
-  }
-
   // ウィジットを画像化してパスに保存
-  Future<bool> paintLandmarks({
-    required BuildContext context,
-    required String frameFilePath,
-  }) async {
+  Future<bool> paintLandmarks({required String frameFileDirPath}) async {
     // ファイル
-    final imageFile = File(frameFilePath);
+    final imageFile = File(frameFileDirPath);
     if (imageFile.existsSync()) {
       // ボーズ推定
       final inputImage = InputImage.fromFile(imageFile);
