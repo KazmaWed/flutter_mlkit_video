@@ -22,6 +22,7 @@ Future<Map<String, dynamic>?> getVideoMetadata(String videoFilePath) async {
   };
 }
 
+// 生成される画像や動画のファイルのキャッシュを削除する
 Future<void> removeFFmpegFiles() async {
   final localDirectory = await getTemporaryDirectory();
   for (var entry in localDirectory.listSync(recursive: true, followLinks: false)) {
@@ -32,11 +33,14 @@ Future<void> removeFFmpegFiles() async {
   }
 }
 
+// ファイルをカメラロールに保存する
 Future<void> saveToCameraRoll(String filePath) async {
   Permission.storage.request();
   await ImageGallerySaver.saveFile(filePath);
 }
 
+// アプリを通じて使うの固定の値
 class CommonValue {
+  // 生成されるキャッシュファイルの名前の頭につける文字列
   static String filePrefix = 'ffmpeg_';
 }

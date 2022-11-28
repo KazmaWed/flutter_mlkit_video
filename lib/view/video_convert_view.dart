@@ -14,14 +14,14 @@ class VideoConvertView extends StatefulWidget {
 class _VideoConvertViewState extends State<VideoConvertView> {
   late Future<void> _future;
 
-  var _busy = false; // 画像化処理の連続実行ガード用
-  var _progress = 0.0; // 完了率
+  var _busy = false; // 処理実行中ガード
+  var _progress = 0.0; // 処理の完了率
 
-  // ビデオの全フレームにランドマークを描画して保存
+  // ビデオの全フレームにランドマークを描画してカメラロールに保存
   Future<void> _convertVideo() async {
     if (!_busy) {
       // 開始
-      setState(() => _busy = true);
+      _busy = true;
 
       // 選択したファイルパス
       final videoFilePath = widget.videoXFile?.path;
@@ -31,13 +31,16 @@ class _VideoConvertViewState extends State<VideoConvertView> {
       // 作成したファイルの保存先パス
       final localPath = await getLocalPath();
 
+      // キャッシュクリア
+      await removeFFmpegFiles();
+
       // コンバーターの作成と初期化
       final mlkitVideoConverter = MlkitVideoConverter();
       await mlkitVideoConverter.initialize(
         localPath: localPath,
         videoFilePath: videoFilePath,
       );
-      // フレーム抽出
+      // ビデオからフレーム抽出
       final frameImageFiles = await mlkitVideoConverter.convertVideoToFrames(context: context);
       // 全フレームにランドマークを描画
       if (frameImageFiles != null) {
@@ -70,7 +73,7 @@ class _VideoConvertViewState extends State<VideoConvertView> {
       );
 
       //  終了
-      setState(() => _busy = false);
+      _busy = false;
     }
   }
 
