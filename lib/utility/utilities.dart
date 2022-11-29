@@ -15,7 +15,8 @@ Future<String> getLocalPath() async {
 // ビデオのメタデータ取得
 Future<Map<String, dynamic>?> getVideoMetadata(String videoFilePath) async {
   final videoInfo = await FlutterVideoInfo().getVideoInfo(videoFilePath) as VideoData;
-  if (videoInfo.orientation == 90 || videoInfo.orientation == 270) {
+  // 縦長画像対応
+  if ((videoInfo.orientation! ~/ 90) % 2 == 1) {
     return {
       'width': videoInfo.height,
       'height': videoInfo.width,
