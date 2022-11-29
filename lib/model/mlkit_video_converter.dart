@@ -65,7 +65,7 @@ class MlkitVideoConverter {
     return files;
   }
 
-  // ウィジットを画像化してパスに保存
+  // フレームにポーズ推定結果を描画してに上書き保存
   Future<bool> paintLandmarks({required String frameFileDirPath}) async {
     // ファイル
     final imageFile = File(frameFileDirPath);
@@ -100,6 +100,7 @@ class MlkitVideoConverter {
     }
   }
 
+  // フレームから動画を再生成
   Future<String?> createVideoFromFrames() async {
     final exportVideoFilePath = '$localPath/ffmpeg_video.mp4';
     final ffmpegCommand =
