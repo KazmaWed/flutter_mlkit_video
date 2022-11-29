@@ -15,11 +15,19 @@ Future<String> getLocalPath() async {
 // ビデオのメタデータ取得
 Future<Map<String, dynamic>?> getVideoMetadata(String videoFilePath) async {
   final videoInfo = await FlutterVideoInfo().getVideoInfo(videoFilePath) as VideoData;
-  return {
-    'width': videoInfo.width,
-    'height': videoInfo.height,
-    'fps': videoInfo.framerate,
-  };
+  if (videoInfo.orientation == 90 || videoInfo.orientation == 270) {
+    return {
+      'width': videoInfo.height,
+      'height': videoInfo.width,
+      'fps': videoInfo.framerate,
+    };
+  } else {
+    return {
+      'width': videoInfo.width,
+      'height': videoInfo.height,
+      'fps': videoInfo.framerate,
+    };
+  }
 }
 
 // 生成される画像や動画のファイルのキャッシュを削除する
