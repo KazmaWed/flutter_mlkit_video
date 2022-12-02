@@ -104,7 +104,7 @@ class MlkitVideoConverter {
   Future<String?> createVideoFromFrames() async {
     final exportVideoFilePath = '$localPath/ffmpeg_video.mp4';
     final ffmpegCommand =
-        '-framerate $videoFps -i $localPath/${CommonValue.filePrefix}%05d.png -r $videoFps $exportVideoFilePath';
+        '-framerate $videoFps -i $localPath/${CommonValue.filePrefix}%05d.png -b 100M -r $videoFps $exportVideoFilePath';
 
     var succeed = false;
 
